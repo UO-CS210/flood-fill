@@ -121,7 +121,7 @@ to be usable with descriptions of different caves, without editing
 
 We could prompt the user to provide a file name, but then we'd have 
 to enter a path like `data/cave.txt` every time we ran it.  We 
-could make it an application that gest the file path from the 
+could make it an application that gets the file path from the 
 command line.  That might be the best approach, but we haven't 
 studied command-line argument parsing with the `argparse` module yet.
 Or we could just create a separate small module, `config`, to 
@@ -130,7 +130,7 @@ a reasonable approach for now.
 
 Create `config.py` in the same directory as `flood.py`  and set a 
 variable `CAVE_PATH` to `data/cave.txt`.  import `config` into 
-`flood.py`.  Then our main function becomes
+`flood.py`.  Then our main function becomes:
 
 ```python
 def main():
@@ -139,7 +139,7 @@ def main():
     print(cave.text(cavern))
 ```
 
-It's behavior should be the same as before. 
+The program behavior should be the same as before. 
 
 ## A graphical view
 
@@ -149,7 +149,7 @@ need are `display`, to create the graphical view, and
 `prompt_to_close`, which we call when we are done to keep the 
 graphic showing until the user presses _enter_.   Instead of 
 printing `text(cavern)`, let's try displaying it.  Import 
-`cave_view` and change the main function again, this time to 
+`cave_view` and change the main function again, this time to: 
 
 ```python
 def main():
@@ -161,7 +161,7 @@ def main():
 
 You'll need to add configuration variables `WIN_WIDTH` and 
 `WIN_HEIGHT` to `config.py`.  I used a 500 for both dimensions (500 
-pixels wide by 750 pixels high), but you may prefer a larger or smaller 
+pixels wide by 500 pixels high), but you may prefer a larger or smaller 
 window 
 depending on the display of the computer you are using. 
 
@@ -198,15 +198,16 @@ def scan_cave(cavern: list[list[str]]) -> int:
 
 Although you could write the nested `for` loops in the form
 `for row in cavern:` and `for col in row:`, we will soon need the 
-indexes of the cells for pouring water.  I suggest you write it 
-instead using indexes, like `for row_i in range(len(cavern)):` and 
+indexes of the cells for pouring water.  Instead, I suggest you 
+write it using indexes, like `for row_i in range(len(cavern)):` and 
 `for col_i in range(len(cavern[0])):`.  Then you can test whether 
 you have encountered a cell containing air with the condition
 `cavern[row_i][col_i] == cave.AIR`.  
 
 Note that you must _NOT_ write `if cavern[row_i][col_i] == " ":`, 
 even though you can tell by looking in `cave.py` that `cave.AIR` is 
-`" "`, and even though it will work correctly if you do.  You must 
+a single space, `" "`, and even though it will work 
+correctly if you do.  You must 
 write your code as if someone could sneak into your code base at any 
 moment and change the value of `cave.AIR` to something different. 
 This is the principle of _information hiding_ that we have mentioned 
@@ -237,7 +238,7 @@ that cell, e.g., `cavern[row_i][col_i] = cave.WATER`.  We can also
 show the water in our display with
 `cave_view.fill_cell(row_i, col_i)`.  To help us visualize how the 
 chambers are filling, we can change the color of water each time we 
-encounter a air, like this: 
+encounter air, like this: 
 
 ```python
         fill(cavern, row_i, col_i)
@@ -373,7 +374,7 @@ but this simpler, shorter pseudocode:
 
 Now we just need to write one condition that checks both whether the 
 row and column are within the proper range and, if they are, whether 
-the current content of the cell at that row and column contain air.  
+the current content of the cell at that row and column contain air. 
 Opportunities for error are fewer, and if we _do_ make a mistake, it 
 will be easier to debug.  The code is simpler to read and understand,
 and easier to write.  
@@ -407,9 +408,9 @@ There is a `FIXME` comment in `graphics/grid.py`:
 ``` 
 FIXME: The color wheel should produce colors of contrasting brightness
 as well as hue, to maximize distinctness for dichromats (people with 
-"color blindness".  Maybe generating a good color wheel can be part of a 
-project later in CS 210.   (This is not a required or expected change
-for the week 5 project.)
+"color blindness").  Maybe generating a good color wheel can be part 
+of a project later in CS 210.   (This is not a required or expected
+change for the week 5 project.)
 ```
 
 The current palette of colors is defined using 
