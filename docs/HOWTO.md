@@ -170,6 +170,15 @@ like this:
 
 ![Graphical deisplay of data/cave.txt](img/cave.png)
 
+## Checkpoint
+
+At this point you should have two modules (source code files),
+`flood.py` and `config.py`.  Your `flood.py` module imports
+`config` as well as `cave` and `cave_view`.  
+
+If you change `config.py` to contain a path to a different cave 
+  description, you should get a diagram of a different cave.
+
 ## Scanning the cave
 
 To count chambers, we will pour water into each chamber we find, 
@@ -226,6 +235,10 @@ count the number of times we encounter a cell that contains air, we
 will count the number of empty cells rather than the number of 
 chambers.  (I got 48.)
 
+You could test for the "magic number" code smell by changing the value 
+of `cave.AIR`.  Changing it to another value like `.` should not 
+change the behavior of your program. 
+
 ## Pour it on! 
 
 Now all we need to do is to fill each chamber with water.  When we 
@@ -261,6 +274,14 @@ count of air cells rather than chambers, and the visualization will
 show different colors in adjacent cells: 
 
 ![Before the water spreads](img/cave-rainbow.png)
+
+## Checkpoint
+
+Now your `flood.py` module contains a `main` function and two other 
+functions, `scan_cave` and `fill`.  Only `scan_cave` contains loops.
+Your `scan_cave` functions counts the number of times it encounters
+`cave.AIR`.  Currently the result should be the number of grid cells
+containing `cave.AIR`; we will change that shortly. 
 
 ## Let it flow
 
@@ -397,9 +418,25 @@ should now be returning the correct count of cave chambers and
 passing its test cases.  Check that it finds 7 chambers in the 
 twisty cave. 
 
+## Checkpoint
+
+Your program now contains the same functions as at the last 
+checkpoint, but function `fill` has been changed to recursively 
+spread water up, down, left, and right.   Function fill should be 
+simple.  Mine is 10 lines, including an `if` condition that
+I broke into three lines for readability.  It does _not_ contain any 
+`for` or `while` loops, only recursive calls.  
+
+Although we haven't changed `scan_cave` at all, it should now be 
+returning the number of air _chambers_ in the cave, rather than the 
+number of cave cells containing air. 
+
+If this describes your program, you have completed the assignment 
+and can turn in `flood.py`. 
+
 ## Challenge yourself: Improve the visualization
 
-At this point your project is complete and can be turned in.
+Your program is already complete. 
 Read on if you are interested in using graphics and other user 
 interface techniques to make programs more useful and usable. 
 
