@@ -243,7 +243,7 @@ You will call `scan_cave` from your `main` function:
 
 ```python
 chambers = scan_cave(cavern)
-    print(f"Found {chambers} chambers")
+print(f"Found {chambers} chambers")
 ```
 
 ## Pour it on! 
