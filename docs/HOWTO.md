@@ -239,6 +239,13 @@ You could test for the "magic number" code smell by changing the value
 of `cave.AIR`.  Changing it to another value like `.` should not 
 change the behavior of your program. 
 
+You will call `scan_cave` from your `main` function: 
+
+```python
+chambers = scan_cave(cavern)
+    print(f"Found {chambers} chambers")
+```
+
 ## Pour it on! 
 
 Now all we need to do is to fill each chamber with water.  When we 
