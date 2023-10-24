@@ -1,19 +1,15 @@
 """A graphical display of a cave represented as a rectangular grid of characters"""
-import graphics.grid
-import graphics.grid as grid_view
+import logging
 
 import cave
+import cave_view_text, cave_view_graphic
+import config
 
-# Size of displayed grid;
-# n_rows == 0 is also interpreted as "there is no current display"
-#
-n_rows = 0
-n_cols = 0
+logging.basicConfig()
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
-# Water color can be changed, e.g., as we
-# move from chamber to chamber
-current_water = graphics.grid.get_cur_color()
-
+ACTIVE = False  # Because doctests don't initialize display
 
 def display(cavern: list[list[str]], width: int, height: int):
     """Create a graphical representation of cave using the grid.
@@ -21,43 +17,56 @@ def display(cavern: list[list[str]], width: int, height: int):
     (e.g., filling cave cells with water of various colors)
     with fill_cell.
     """
-    global n_rows, n_cols
-    n_rows = len(cavern)
-    n_cols = len(cavern[0])
-    grid_view.make(n_rows, n_cols, width, height)
-    for row in range(n_rows):
-        for col in range(n_cols):
-            if cavern[row][col] == cave.STONE:
-                grid_view.fill_cell(row, col, grid_view.black)
-            elif cavern[row][col] == cave.WATER:
-                grid_view.fill_cell(row, col, current_water)
+    global ACTIVE
+    ACTIVE = True
+    if config.GRAPHIC_DISPLAY:
+        cave_view_graphic.display(cavern, width, height)
+    if config.TEXTUAL_DISPLAY:
+        cave_view_text.display(cavern, width, height)
     return
 
 
 def change_water():
     """Switch to a new color of water"""
-    global current_water
-    current_water = graphics.grid.get_next_color()
+    if not ACTIVE:
+        log.debug("Skipping change_water, display is not active")
+        return
+    if config.GRAPHIC_DISPLAY:
+        cave_view_graphic.change_water()
+    if config.TEXTUAL_DISPLAY:
+        cave_view_text.change_water()
+    return
 
 
 def fill_cell(row: int, col: int):
     """Fill display of cave[row][col] with current colored water"""
-    # NOTE:  We need this to be a "do-nothing" function if there is no current display,
-    # as will be the case when running doctests.  We take n_rows == 0 as
-    # our signal that there is no display.
-    if n_rows == 0:
+    if not ACTIVE:
+        log.debug("Skipping fill_cell because display is not active")
+        # Probably because we're running doctests
         return
-    assert 0 <= row < n_rows, f"Row must be in range 0..{n_rows - 1} "
-    assert 0 <= col < n_cols, f"Column must be in range 0..{n_cols - 1}"
-    grid_view.fill_cell(row, col, color=current_water)
-
+    if config.GRAPHIC_DISPLAY:
+        cave_view_graphic.fill_cell(row, col)
+    if config.TEXTUAL_DISPLAY:
+        cave_view_text.fill_cell(row, col)
 
 def prompt_to_close():
-    """Prompt the user before closing the display"""
-    input("Press enter to close display")
-    grid_view.win.close()
-    n_rows = 0
-    n_cols = 0
+    """Prompt the user before closing the display,
+    only for graphic display.
+    """
+    if config.GRAPHIC_DISPLAY:
+        cave_view_graphic.prompt_to_close()
+    return
+
+def redisplay(cavern: list[list[str]]):
+    """Make sure current version is on display"""
+    if not ACTIVE:
+        log.debug("Redisplay skipped because inactive (probably doctests)")
+        return
+    if config.TEXTUAL_DISPLAY:
+        cave_view_text.redisplay(cavern)
+    if config.GRAPHIC_DISPLAY:
+        cave_view_graphic.redisplay(cavern)
+
 
 
 

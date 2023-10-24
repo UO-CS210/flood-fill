@@ -9,16 +9,71 @@ competition.  The problem was to determine how many distinct
 
 ![Example cave](img/cave1.png)
 
+The cave will be represented as a grid, implemented as a list of 
+lists of characters (type `str`).
+The default 
+character choices in `config.py` represent stone by `'#'`,
+air by `' '` (a space), and water by `'~'`.  With these settings, 
+the same cave can be represented like this: 
+
+```text
+# # # # # # # # # #
+#       #   #     #
+#       #   #     #
+#           #     #
+#       #   #     #
+#       #   #     #
+#       # # # # # #
+#       #         #
+#       #         #
+# # # # # # # # # #
+```
+
+A different choice of characters might work better with a 
+screen-reader like JAWS, NVDA, or VoiceOver.  If we change 
+config.py to represent 
+stone by `'s'`, air by `'*'`, and water by `'w'`, then the textual 
+representation will look like this: 
+
+```
+s s s s s s s s s s
+s * * * s * s * * s
+s * * * s * s * * s
+s * * * * * s * * s
+s * * * s * s * * s
+s * * * s * s * * s
+s * * * s s s s s s
+s * * * s * * * * s
+s * * * s * * * * s
+s s s s s s s s s s
+```
+
+Initially the cave contains no water.  We'll add that soon. 
 You will be able to determine that this cave
 has three chambers, indicated 
-here by filling each chamber with a different color of water.
+by filling each chamber with a different color of water.
 
 ![Example cave filled](img/cave1-filled.png)
 
-The cave will be represented as a grid, implemented as a list of 
-lists of characters (type `str`).  Initially each cell in the grid 
-will either be a well or an empty space.  You will look for empty 
-cells using nested loops.  When you find an empty cell, you will 
+or textually 
+
+```text
+s s s s s s s s s s
+s 1 1 1 s 1 s 2 2 s
+s 1 1 1 s 1 s 2 2 s
+s 1 1 1 1 1 s 2 2 s
+s 1 1 1 s 1 s 2 2 s
+s 1 1 1 s 1 s 2 2 s
+s 1 1 1 s s s s s s
+s 1 1 1 s 3 3 3 3 s
+s 1 1 1 s 3 3 3 3 s
+s s s s s s s s s s
+```
+
+Initially each cell in the grid 
+will either be a wall or an empty space.  You will look for cells
+containing air.  When 
+you find a cell containing air, you will 
 pour water into it.  As you know, water naturally spreads out into a 
 chamber.  You will write a recursive function to spread it out and 
 fill the whole chamber. 
@@ -128,8 +183,8 @@ Or we could just create a separate small module, `config`, to
 provide this information.  Creating a configuration file seems like 
 a reasonable approach for now. 
 
-Create `config.py` in the same directory as `flood.py`  and set a 
-variable `CAVE_PATH` to `data/cave.txt`.  import `config` into 
+`config.py` in the same directory as `flood.py` sets a 
+variable `CAVE_PATH` to `"data/cave.txt"`.  import `config` into 
 `flood.py`.  Then our main function becomes:
 
 ```python
@@ -141,11 +196,30 @@ def main():
 
 The program behavior should be the same as before. 
 
-## A graphical view
+## Viewing the cave
 
-I have also provided a module `cave_view` to provide a graphical 
-depiction of the cave.  The functions of `cave_view` that we will 
-need are `display`, to create the graphical view, and 
+While we can make a call to `cave.text()` to get a printable
+version, we may wish to see a graphical version and/or a textual 
+version as the program runs.  I have provided a module `cave_view` 
+to provide a graphical or textual view.  For these, you will need
+to add two new lines to `config.py`:
+
+```python
+GRAPHIC_DISPLAY = True  # Grid display using Tk
+WIN_WIDTH = 300   # Width of graphical display in pixels
+WIN_HEIGHT = 300  # Height of graphical display in pixels
+TEXTUAL_DISPLAY = True  # Textual depiction of the cavern
+```
+Of course you can disable either view by 
+setting those options to `False` instead.  
+
+Once you have the configuration options, you can import `cave_view` 
+into `flood.py`. 
+
+
+ The functions of `cave_view` that we will 
+need are `display`, to create the graphical view, `redisplay` to 
+ refresh it, and 
 `prompt_to_close`, which we call when we are done to keep the 
 graphic showing until the user presses _enter_.   Instead of 
 printing `text(cavern)`, let's try displaying it.  Import 
@@ -159,16 +233,27 @@ def main():
     cave_view.prompt_to_close()
 ```
 
-You'll need to add configuration variables `WIN_WIDTH` and 
-`WIN_HEIGHT` to `config.py`.  I used a 500 for both dimensions (500 
-pixels wide by 500 pixels high), but you may prefer a larger or smaller 
-window 
-depending on the display of the computer you are using. 
-
-Now instead of the textual representation, you should see something 
+Now with the graphical display enabled you should see something 
 like this: 
 
-![Graphical deisplay of data/cave.txt](img/cave.png)
+![Graphical display of data/cave.txt](img/cave.png)
+
+and with the textual display enabled, with default character choices  
+you should see something like 
+this: 
+
+```text
+# # # # # # # # # #
+#       #   #     #
+#       #   #     #
+#           #     #
+#       #   #     #
+#       #   #     #
+#       # # # # # #
+#       #         #
+#       #         #
+# # # # # # # # # #
+```
 
 ## Checkpoint
 
@@ -211,21 +296,37 @@ indexes of the cells for pouring water.  Instead, I suggest you
 write it using indexes, like `for row_i in range(len(cavern)):` and 
 `for col_i in range(len(cavern[0])):`.  Then you can test whether 
 you have encountered a cell containing air with the condition
-`cavern[row_i][col_i] == cave.AIR`.  
+`cavern[row_i][col_i] == config.AIR`.  
 
 Note that you must _NOT_ write `if cavern[row_i][col_i] == " ":`, 
-even though you can tell by looking in `cave.py` that `cave.AIR` is 
+even though you can tell that `cave.AIR` is 
 a single space, `" "`, and even though it will work 
-correctly if you do.  You must 
-write your code as if someone could sneak into your code base at any 
-moment and change the value of `cave.AIR` to something different. 
-This is the principle of _information hiding_ that we have mentioned 
-before.  Using the value `" "` directly, rather than refering to it 
-by the symbolic name `cave.AIR`, is called _hard coding_ a
+correctly (at first) if you do.  Even if you did not anticipate a user 
+changing 
+these choices in the `config.py` file, you should write as if 
+they could. 
+This is the principle of _information hiding_.  Using the 
+value `" "` directly, rather than refering to it 
+by the symbolic name `config.AIR`, is called _hard coding_ a
 [_magic number_](
 https://en.wikipedia.org/wiki/Magic_number_(programming))
 (even though it's a string rather than a number).  Magic numbers are 
 considered a very bad _code smell_.  
+
+When you find a cell containing air, you should place water in that 
+cell: 
+
+```python
+            cavern[row_i][col_i] = config.WATER
+```
+
+We'd also like to update the view to show the water.  This will 
+display immediately in the graphical view, and in the textual 
+display when we call `cave_view.redisplay(cavern)`.
+
+```python
+            cave_view.fill_cell(row_i, col_i)
+```
 
 The first test case should succeed, as the air pocket in
 `tiny_cave.txt` is just a single cell.  The second test case 
@@ -233,18 +334,31 @@ should fail:  Although there are just three large chambers in
 `cave.txt`, each of those chambers contains several cells.  If we 
 count the number of times we encounter a cell that contains air, we 
 will count the number of empty cells rather than the number of 
-chambers.  (I got 48.)
+chambers.  (I got 48, which means my test case expecting three
+chambers "failed", but only because I'm not done yet.)
 
 You could test for the "magic number" code smell by changing the value 
 of `cave.AIR`.  Changing it to another value like `.` should not 
 change the behavior of your program. 
 
-You will call `scan_cave` from your `main` function: 
+You will call `scan_cave` from your `main` function, which should 
+display the cave before scanning and then again after: 
 
 ```python
-chambers = scan_cave(cavern)
-print(f"Found {chambers} chambers")
+def main():
+    doctest.testmod()
+    cavern = cave.read_cave(config.CAVE_PATH)
+    cave_view.display(cavern,config.WIN_WIDTH, config.WIN_HEIGHT)
+    chambers = scan_cave(cavern)
+    print(f"Found {chambers} chambers")
+    cave_view.redisplay(cavern)
+    cave_view.prompt_to_close()
 ```
+
+After announcing how many chambers we found, we make sure the final 
+version of the cave is displayed (this will print the textual
+version again) and then wait for the user to admire our beautiful 
+graphics before removing the graphical version. 
 
 ## Pour it on! 
 
@@ -272,7 +386,7 @@ display:
 ```python
 def fill(cavern: list[list[str]], row_i: int, col_i: int):
     """Pour water into cell at row_i, col_i"""
-    cavern[row_i][col_i] = cave.WATER
+    cavern[row_i][col_i] = config.WATER
     cave_view.fill_cell(row_i, col_i)
 ```
 
@@ -303,6 +417,15 @@ determine the row and column of the adjacent cells in each direction.
 ![Up, down, left, right as coordinates](
 img/fill-directions.png
 )
+
+The cell directly above cell (r, c) is cell (r-1, c).  The cell 
+directly below is cell (r+1, c).  The cell to the left is
+cell (r, c-1). The cell to the right is cell (r, c+1).  
+
+If any of 
+these coordinates are not within bounds (e.g., if r is less than 0), 
+that indicates that there is no cell in that direction (e.g., r less 
+than 0 indicates a space "above" the grid). 
 
 It is tempting to try to write loops to fill cells in each direction.
 If we were spreading water in just one direction, a loop would work 
@@ -413,6 +536,21 @@ color of water:
 
 ![Final display from `cave.txt`](img/cave-final.png)
 
+Textually we use digits instead of colors: 
+
+```text
+# # # # # # # # # #
+# 1 1 1 # 1 # 2 2 #
+# 1 1 1 # 1 # 2 2 #
+# 1 1 1 1 1 # 2 2 #
+# 1 1 1 # 1 # 2 2 #
+# 1 1 1 # 1 # 2 2 #
+# 1 1 1 # # # # # #
+# 1 1 1 # 3 3 3 3 #
+# 1 1 1 # 3 3 3 3 #
+# # # # # # # # # #
+```
+
 You can try with some of the other cave specifications in the `data` 
 directory, or create some of your own. The twisty cave 
 (`data/twisty-cave.txt`) checks that water can spread along more 
@@ -441,7 +579,7 @@ number of cave cells containing air.
 If this describes your program, you have completed the assignment 
 and can turn in `flood.py`. 
 
-## Challenge yourself: Improve the visualization
+## Challenge yourself 1: Improve the graphical visualization
 
 Your program is already complete. 
 Read on if you are interested in using graphics and other user 
@@ -491,6 +629,10 @@ https://www.w3.org/standards/webdesign/accessibility)
 are maintained by the W3 Consortium.  They are useful reading also 
 for developers of other kinds of application. 
 
+## Challenge yourself 2: Improve the non-visual display
+
+(Initial notes from Fall 2022)
+
 If you want to really challenge yourself in thinking about interface 
 design, consider how you would rework the "visualization" to work 
 for people with limited vision.  Many people with blindness or 
@@ -507,8 +649,27 @@ attach different or varied user interfaces for the same
 functionality.  We will study program structures for more dynamic 
 connection of user interface with functionality in the next term. 
 
+(Revised notes from Fall 2023)
 
+The simple textual display was added in fall 2023 to work 
+with screen readers like JAWS and NVDA.  I'm certain it could be 
+improved.  I am not sure yet whether or how an audio interface could 
+help.  If you have an interest in perception or cognitive psychology 
+as well as computing, designing effective non-visual interfaces is a 
+rich area for further work.  
 
+In addition to being essential for 
+users with limited vision, there are many contexts in which 
+non-visual interfaces are better even for sighted users.  Consider, 
+for example, the control panel of an automobile. Traditional knobs 
+on the car radio, and various levers and buttons to control heat, 
+temperature, etc, were originally designed to be operable by feel, 
+without looking.  Migrating controls to touch panels that 
+require 
+visual attention is a step backward in automobile safety.  I hope 
+some of you will design user interface techniques of the future that 
+will both make computing more widely accessible and avoid visual 
+distractions. 
 
 
 
