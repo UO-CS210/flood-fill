@@ -9,7 +9,12 @@ competition.  The problem was to determine how many distinct
 
 ![Example cave](img/cave1.png)
 
-or, if represented textually, like this: 
+The cave will be represented as a grid, implemented as a list of 
+lists of characters (type `str`).
+The default 
+character choices in `config.py` represent stone by `'#'`,
+air by `' '` (a space), and water by `'~'`.  With these settings, 
+the same cave can be represented like this: 
 
 ```text
 # # # # # # # # # #
@@ -24,21 +29,51 @@ or, if represented textually, like this:
 # # # # # # # # # #
 ```
 
+A different choice of characters might work better with a 
+screen-reader like JAWS, NVDA, or VoiceOver.  If we change 
+config.py to represent 
+stone by `'s'`, air by `'*'`, and water by `'w'`, then the textual 
+representation will look like this: 
+
+```
+s s s s s s s s s s
+s * * * s * s * * s
+s * * * s * s * * s
+s * * * * * s * * s
+s * * * s * s * * s
+s * * * s * s * * s
+s * * * s s s s s s
+s * * * s * * * * s
+s * * * s * * * * s
+s s s s s s s s s s
+```
+
+Initially the cave contains no water.  We'll add that soon. 
 You will be able to determine that this cave
 has three chambers, indicated 
-here by filling each chamber with a different color of water.
+by filling each chamber with a different color of water.
 
 ![Example cave filled](img/cave1-filled.png)
 
 or textually 
 
-![Example text display of filled cave goes here](img/FIXME.png)
+```text
+s s s s s s s s s s
+s 1 1 1 s 1 s 2 2 s
+s 1 1 1 s 1 s 2 2 s
+s 1 1 1 1 1 s 2 2 s
+s 1 1 1 s 1 s 2 2 s
+s 1 1 1 s 1 s 2 2 s
+s 1 1 1 s s s s s s
+s 1 1 1 s 3 3 3 3 s
+s 1 1 1 s 3 3 3 3 s
+s s s s s s s s s s
+```
 
-
-The cave will be represented as a grid, implemented as a list of 
-lists of characters (type `str`).  Initially each cell in the grid 
-will either be a wall or an empty space.  You will look for empty 
-cells using nested loops.  When you find an empty cell, you will 
+Initially each cell in the grid 
+will either be a wall or an empty space.  You will look for cells
+containing air.  When 
+you find a cell containing air, you will 
 pour water into it.  As you know, water naturally spreads out into a 
 chamber.  You will write a recursive function to spread it out and 
 fill the whole chamber. 
