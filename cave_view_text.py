@@ -23,7 +23,6 @@ def display(cavern: list[list[str]], width: int, height: int):
 
 def show(cavern: list[list[str]]):
     """For now, like printed version but with spaces.
-    FIXME: Digits that serve like water colors in graphics.
     """
     print()
     for row in CAVE_COPY:
