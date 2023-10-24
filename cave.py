@@ -4,14 +4,15 @@ CC-by-SA open source license
 
 This module creates and returns a grid represented as a list-of-lists.
 It can also manage an associated cavern display.
+
+Note doctests refer to textual output that will be different
+(causing all tests to fail) if representations of stone, air,
+and water are changed in config.py.  This is an intrinsic
+limitation of doctests.
 """
 import doctest
 
-# Text symbols (single characters) for contents of grid
-AIR = " "
-STONE = "#"
-WATER = "~"
-
+import config
 
 
 def read_cave(cavern_path: str) -> list[list[str]]:
@@ -78,7 +79,7 @@ def new_cave(nrows: int, ncols: int):
         newRow = []
         cave.append(newRow)
         for col in range(ncols):
-            newRow.append(AIR)
+            newRow.append(config.AIR)
     return cave
 
 
@@ -92,7 +93,7 @@ def hwall(cave: list[list[str]], row: int, col: int, length: int):
     [[' ', ' ', ' '], [' ', '#', '#'], [' ', ' ', ' ']]
     """
     for i in range(length):
-        cave[row][col + i] = STONE
+        cave[row][col + i] = config.STONE
 
 
 def vwall(cave: list[list[str]], row: int, col: int, length: int):
@@ -105,7 +106,7 @@ def vwall(cave: list[list[str]], row: int, col: int, length: int):
     [[' ', ' ', ' '], [' ', '#', ' '], [' ', '#', ' ']]
     """
     for i in range(length):
-        cave[row + i][col] = STONE
+        cave[row + i][col] = config.STONE
 
 def text(cave: list[list[str]]) -> str:
     """A textual version of the cave, for debugging

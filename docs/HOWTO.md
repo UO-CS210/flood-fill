@@ -9,15 +9,35 @@ competition.  The problem was to determine how many distinct
 
 ![Example cave](img/cave1.png)
 
+or, if represented textually, like this: 
+
+```text
+# # # # # # # # # #
+#       #   #     #
+#       #   #     #
+#           #     #
+#       #   #     #
+#       #   #     #
+#       # # # # # #
+#       #         #
+#       #         #
+# # # # # # # # # #
+```
+
 You will be able to determine that this cave
 has three chambers, indicated 
 here by filling each chamber with a different color of water.
 
 ![Example cave filled](img/cave1-filled.png)
 
+or textually 
+
+![Example text display of filled cave goes here](img/FIXME.png)
+
+
 The cave will be represented as a grid, implemented as a list of 
 lists of characters (type `str`).  Initially each cell in the grid 
-will either be a well or an empty space.  You will look for empty 
+will either be a wall or an empty space.  You will look for empty 
 cells using nested loops.  When you find an empty cell, you will 
 pour water into it.  As you know, water naturally spreads out into a 
 chamber.  You will write a recursive function to spread it out and 
@@ -129,7 +149,7 @@ provide this information.  Creating a configuration file seems like
 a reasonable approach for now. 
 
 Create `config.py` in the same directory as `flood.py`  and set a 
-variable `CAVE_PATH` to `data/cave.txt`.  import `config` into 
+variable `CAVE_PATH` to `"data/cave.txt"`.  import `config` into 
 `flood.py`.  Then our main function becomes:
 
 ```python
@@ -141,11 +161,30 @@ def main():
 
 The program behavior should be the same as before. 
 
-## A graphical view
+## Viewing the cave
 
-I have also provided a module `cave_view` to provide a graphical 
-depiction of the cave.  The functions of `cave_view` that we will 
-need are `display`, to create the graphical view, and 
+While we can make a call to `cave.text()` to get a printable
+version, we may wish to see a graphical version and/or a textual 
+version as the program runs.  I have provided a module `cave_view` 
+to provide a graphical or textual view.  For these, you will need
+to add two new lines to `config.py`:
+
+```python
+GRAPHIC_DISPLAY = True  # Grid display using Tk
+WIN_WIDTH = 300   # Width of graphical display in pixels
+WIN_HEIGHT = 300  # Height of graphical display in pixels
+TEXTUAL_DISPLAY = True  # Textual depiction of the cavern
+```
+Of course you can disable either view by 
+setting those options to `False` instead.  
+
+Once you have the configuration options, you can import `cave_view` 
+into `flood.py`. 
+
+
+ The functions of `cave_view` that we will 
+need are `display`, to create the graphical view, `redisplay` to 
+ refresh it, and 
 `prompt_to_close`, which we call when we are done to keep the 
 graphic showing until the user presses _enter_.   Instead of 
 printing `text(cavern)`, let's try displaying it.  Import 
@@ -159,16 +198,26 @@ def main():
     cave_view.prompt_to_close()
 ```
 
-You'll need to add configuration variables `WIN_WIDTH` and 
-`WIN_HEIGHT` to `config.py`.  I used a 500 for both dimensions (500 
-pixels wide by 500 pixels high), but you may prefer a larger or smaller 
-window 
-depending on the display of the computer you are using. 
-
-Now instead of the textual representation, you should see something 
+Now with the graphical display enabled you should see something 
 like this: 
 
-![Graphical deisplay of data/cave.txt](img/cave.png)
+![Graphical display of data/cave.txt](img/cave.png)
+
+and with the textual display enabled you should see something like 
+this: 
+
+```text
+# # # # # # # # # #
+#       #   #     #
+#       #   #     #
+#           #     #
+#       #   #     #
+#       #   #     #
+#       # # # # # #
+#       #         #
+#       #         #
+# # # # # # # # # #
+```
 
 ## Checkpoint
 
@@ -233,18 +282,28 @@ should fail:  Although there are just three large chambers in
 `cave.txt`, each of those chambers contains several cells.  If we 
 count the number of times we encounter a cell that contains air, we 
 will count the number of empty cells rather than the number of 
-chambers.  (I got 48.)
+chambers.  (I got 48, which means my test case expecting three
+chambers "failed", but only because I'm not done yet.)
 
 You could test for the "magic number" code smell by changing the value 
 of `cave.AIR`.  Changing it to another value like `.` should not 
 change the behavior of your program. 
 
-You will call `scan_cave` from your `main` function: 
+You will call `scan_cave` from your `main` function:
 
 ```python
+import cave_view
+
 chambers = scan_cave(cavern)
 print(f"Found {chambers} chambers")
+cave_view.redisplay()
+cave_view.prompt_to_close()
 ```
+
+After announcing how many chambers we found, we make sure the final 
+version of the cave is displayed (this will print the textual
+version again) and then wait for the user to admire our beautiful 
+graphics before removing the graphical version. 
 
 ## Pour it on! 
 
@@ -303,6 +362,15 @@ determine the row and column of the adjacent cells in each direction.
 ![Up, down, left, right as coordinates](
 img/fill-directions.png
 )
+
+The cell directly above cell (r, c) is cell (r-1, c).  The cell 
+directly below is cell (r+1, c).  The cell to the left is
+cell (r, c-1). The cell to the right is cell (r, c+1).  
+
+If any of 
+these coordinates are not within bounds (e.g., if r is less than 0), 
+that indicates that there is no cell in that direction (e.g., r less 
+than 0 indicates a space "above" the grid). 
 
 It is tempting to try to write loops to fill cells in each direction.
 If we were spreading water in just one direction, a loop would work 
