@@ -11,8 +11,7 @@ competition.  The problem was to determine how many distinct
 
 The cave will be represented as a grid, implemented as a list of 
 lists of characters (type `str`).
-The default 
-character choices in `config.py` represent stone by `'#'`,
+The default character choices in `config.py` represent stone by `'#'`,
 air by `' '` (a space), and water by `'~'`.  With these settings, 
 the same cave can be represented like this: 
 
