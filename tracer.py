@@ -1,9 +1,20 @@
-"""A decorator that traces calls/returns of a recursive function."""
+"""A decorator that traces calls/returns of a recursive function.
 
-from functools import wraps
+Usage:
+  from tracer import trace
+
+  @trace()
+  def my_recursive_function(m, n):
+      ...
+
+Calls and returns of my_recursive_function will be written to the standard error stream.
+
+Limitations:  Not suitable for multi-threaded programs or anything else without a simple
+call-return structure on a single stack.  For example, may be a mess with generators.
+"""
+
 import sys
-
-VLINE = "⏐"
+from functools import wraps
 
 
 def trace(log_to=sys.stderr, call_stack = []):
@@ -60,4 +71,6 @@ def fib(m: int) -> int:
 # print()
 # print(gcd(18,24))
 # print()
-print(fib(5))
+if __name__ == "__main__":
+    print("Tracing recursive fibonacci(4)")
+    print(fib(4))
