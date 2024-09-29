@@ -3,7 +3,6 @@
 CC-by-SA open source license
 
 This module creates and returns a grid represented as a list-of-lists.
-It can also manage an associated cavern display.
 
 Note doctests refer to textual output that will be different
 (causing all tests to fail) if representations of stone, air,
