@@ -11,8 +11,7 @@ competition.  The problem was to determine how many distinct
 
 The cave will be represented as a grid, implemented as a list of 
 lists of characters (type `str`).
-The default 
-character choices in `config.py` represent stone by `'#'`,
+The default character choices in `config.py` represent stone by `'#'`,
 air by `' '` (a space), and water by `'~'`.  With these settings, 
 the same cave can be represented like this: 
 
@@ -320,8 +319,10 @@ cell:
             cavern[row_i][col_i] = config.WATER
 ```
 
-We'd also like to update the view to show the water.  This will 
-display immediately in the graphical view, and in the textual 
+You should also update a count of the number of air pockets discovered.
+This count is the value that `scan_cave` returns.  
+In addition we would like to update the view to show the water.
+This will display immediately in the graphical view, and in the textual 
 display when we call `cave_view.redisplay(cavern)`.
 
 ```python
@@ -367,24 +368,27 @@ encounter a cell containing air, we'll still count it as a chamber,
 but then we'll flood it so that we don't count any more cells in 
 that chamber.   
 
-We can fill a single cell with water by assigning `cave.WATER` to 
-that cell, e.g., `cavern[row_i][col_i] = cave.WATER`.  We can also 
-show the water in our display with
-`cave_view.fill_cell(row_i, col_i)`.  To help us visualize how the 
+So far we have filled a single cell with water by assigning
+`cave.WATER` to that cell, e.g., `cavern[row_i][col_i] = cave.WATER`.
+Replace that line with a call to a new function `pour`.  We will 
+write `pour` to not 
+only fill in that individual cell, but also spread it through the 
+chamber.  
+ To help us visualize how the 
 chambers are filling, we can change the color of water each time we 
 encounter air, like this: 
 
 ```python
-        fill(cavern, row_i, col_i)
+        pour(cavern, row_i, col_i)
         cave_view.change_water()
 ```
 
-Our first version of `fill` can simply put water in the one 
+Our first version of `pour` can simply put water in the one 
 discovered cell of air and update the corresponding area on the 
 display: 
 
 ```python
-def fill(cavern: list[list[str]], row_i: int, col_i: int):
+def pour(cavern: list[list[str]], row_i: int, col_i: int):
     """Pour water into cell at row_i, col_i"""
     cavern[row_i][col_i] = config.WATER
     cave_view.fill_cell(row_i, col_i)
@@ -399,7 +403,7 @@ show different colors in adjacent cells:
 ## Checkpoint
 
 Now your `flood.py` module contains a `main` function and two other 
-functions, `scan_cave` and `fill`.  Only `scan_cave` contains loops.
+functions, `scan_cave` and `pour`.  Only `scan_cave` contains loops.
 Your `scan_cave` functions counts the number of times it encounters
 `cave.AIR`.  Currently the result should be the number of grid cells
 containing `cave.AIR`; we will change that shortly. 
@@ -430,15 +434,52 @@ than 0 indicates a space "above" the grid).
 It is tempting to try to write loops to fill cells in each direction.
 If we were spreading water in just one direction, a loop would work 
 well.  For spreading in all four directions, recursion is much 
-easier.  We'll note this intent in the function header for `fill`:
+easier.  We'll note this intent in the function header for `pour`:
 
 
 ```python
-def fill(cavern: list[list[str]], row_i: int, col_i: int):
+def pour(cavern: list[list[str]], row_i: int, col_i: int):
     """Fill the whole chamber around cavern[row_i][col_i] with water
     """
 ```
 
+Recursion can be confusing at first ... there will be _lots_ of 
+recursive calls to _pour_, and it can be hard to see how they are 
+related.  To make it just a little easier to understand, at least 
+for small caves, we'll add some instrumentation to our `pour` 
+function.  Add this in the imports section of your source file: 
+
+`from tracer import trace`
+
+This imports a single function, `trace`, from `tracer.py`.  Function 
+`trace` is a special kind of function called a _decorator_.  Think 
+of it as decorative paper to wrap around a function.  (In fact this 
+kind of function is also called a _wrapper_.)  We will wrap it 
+around the `pour` function this way: 
+
+```python
+@trace()
+def pour(cavern: list[list[str]], row_i: int, col_i: int):
+    """Fill the whole chamber around cavern[row_i][col_i] with water
+    """
+```
+
+<aside class="notice">
+The `trace()` decorator is only useful for very small caves.  For a 
+large cave, it produces too much output.  I suggest using it to 
+understand small examples, then commenting it out while working with 
+larger caves. 
+
+We will just _use_ the `trace()` decorator for now. You are welcome to 
+look through `tracer.py`, but I think you will find it a bit complex.
+(A function that returns a function that takes a function and 
+returns another function ... phew.)
+Learning to _write_ decorators is a good thing to put on your bucket 
+list if you continue to work in Python and want to develop more 
+advanced professional skills. 
+</aside>
+
+### Base and recursive cases 
 
 Recall that when we design a recursive function, we always
 distinguish one or more _base_ cases and one or more _recursive_ 
@@ -458,7 +499,7 @@ the base case(s) less obvious.
 
 For flood-fill, the recursive case seems to be the easier starting 
 point.  We have already sketched it:  We fill one cell with water, 
-and recursively call `fill` with the row and column of four 
+and recursively call `pour` with the row and column of four 
 neighboring cells.  But the recursive case must make _progress_ in 
 the sense of making recursive calls only on "smaller" or "simpler" 
 problems.  In what sense is the problem "smaller" or "simpler" when 
@@ -466,13 +507,12 @@ we make a recursive call to flood-fill from a neighboring cell?
 
 We might also be worried about all the conditions under which we 
 cannot fill a neighboring cell.  We can't pour water where there is 
-a stone wall, and we don't want to pour water in the stone walls, 
-but in addition we can't pour water outside the cavern, for example 
+a stone wall, and we can't pour water outside the cavern, for example 
 in a row or column with a negative index. We might be worried about 
 how complicated our code will be if we consider all the relevant 
 conditions before each of the recursive calls. 
 
-Intuitively, each time we call `fill`, there should be fewer cells 
+Intuitively, each time we call `pour`, there should be fewer cells 
 holding air than there were before.  This is a useful hint about the 
 base cases.  We might initially think of checking, before each 
 recursive call, that we are spreading into an air pocket.  For 
@@ -483,7 +523,7 @@ something like:
     row_up_i = row_i - 1
     if (row_up_i >= 0 and row_up_i < len(cavern)
         and cavern[row_up_i][col_i] == cave.AIR):
-        fill(cavern, row_up_i, col_i)
+        pour(cavern, row_up_i, col_i)
 ```
 
 We could imagine variations on this complicated check for all four 
@@ -515,10 +555,10 @@ but this simpler, shorter pseudocode:
 ```
     if this a cell in the grid, and it contains air: 
         fill this cell with water
-        recursively call fill on the cell above
-        recursively call fill on the cell below
-        recursively call fill on the cell left
-        recursively call fill on the cell right
+        recursively call pour on the cell above
+        recursively call pour on the cell below
+        recursively call pour on the cell left
+        recursively call pour on the cell right
     else:
         just return without doing anything
 ```
@@ -631,8 +671,6 @@ for developers of other kinds of application.
 
 ## Challenge yourself 2: Improve the non-visual display
 
-(Initial notes from Fall 2022)
-
 If you want to really challenge yourself in thinking about interface 
 design, consider how you would rework the "visualization" to work 
 for people with limited vision.  Many people with blindness or 
@@ -647,14 +685,18 @@ would you evaluate it?
 We don't yet have the programming techniques for making it easy to 
 attach different or varied user interfaces for the same 
 functionality.  We will study program structures for more dynamic 
-connection of user interface with functionality in the next term. 
-
-(Revised notes from Fall 2023)
+connection of user interface with functionality in the next term.
 
 The simple textual display was added in fall 2023 to work 
 with screen readers like JAWS and NVDA.  I'm certain it could be 
 improved.  I am not sure yet whether or how an audio interface could 
-help.  If you have an interest in perception or cognitive psychology 
+help.  One lesson I learned is that a visual interface often reduces 
+the memory load for sighted users, who can glance at the display 
+instead of remembering details.  A non-visual display (including a 
+text display accessed through a screen reader) is not very 
+"glanceable", so one must be careful to include examples that do not 
+put an excessive load on short-term memory. If you have an interest in 
+perception or cognitive psychology 
 as well as computing, designing effective non-visual interfaces is a 
 rich area for further work.  
 
