@@ -134,6 +134,7 @@ If a stone wall does not pass through a cell in the cave, that cell
 contains air. 
 
 I have provided a module `cave` (file `cave.py`) for building caves. 
+Import it. 
 We can get started by building a very small cave, based on the 
 specification in `data/cave-rect.txt`.  We'll need to import the 
 `cave` module in the usual way.  Then we'll use the `read_cave` 
@@ -148,8 +149,8 @@ def main():
     print(cave.text(cavern))
 ```
 
-This should result in a primitive printed version of a narrow, deep 
-cave: 
+Run this program. This should result in
+a primitive printed version of a narrow, deep cave: 
 
 ``` 
 ------------
@@ -200,8 +201,8 @@ The program behavior should be the same as before.
 While we can make a call to `cave.text()` to get a printable
 version, we may wish to see a graphical version and/or a textual 
 version as the program runs.  I have provided a module `cave_view` 
-to provide a graphical or textual view.  For these, you will need
-to add two new lines to `config.py`:
+to provide a graphical or textual view.  These are controlled by the 
+following lines in `config.py`:
 
 ```python
 GRAPHIC_DISPLAY = True  # Grid display using Tk
@@ -211,12 +212,10 @@ TEXTUAL_DISPLAY = True  # Textual depiction of the cavern
 ```
 Of course you can disable either view by 
 setting those options to `False` instead.  
-
-Once you have the configuration options, you can import `cave_view` 
+ 
+To support the graphic display, import `cave_view` 
 into `flood.py`. 
-
-
- The functions of `cave_view` that we will 
+The functions of `cave_view` that we will 
 need are `display`, to create the graphical view, `redisplay` to 
  refresh it, and 
 `prompt_to_close`, which we call when we are done to keep the 
@@ -310,7 +309,7 @@ by the symbolic name `config.AIR`, is called _hard coding_ a
 [_magic number_](
 https://en.wikipedia.org/wiki/Magic_number_(programming))
 (even though it's a string rather than a number).  Magic numbers are 
-considered a very bad _code smell_.  
+considered a bad _code smell_.  
 
 When you find a cell containing air, you should place water in that 
 cell: 
@@ -370,7 +369,10 @@ that chamber.
 
 So far we have filled a single cell with water by assigning
 `cave.WATER` to that cell, e.g., `cavern[row_i][col_i] = cave.WATER`.
-Replace that line with a call to a new function `pour`.  We will 
+We displayed it with `cave_view.fill_cell(row_i, col_i)`.
+Replace those lines with a call to a new function `pour`.
+(Keep the line that increments the number of air chambers 
+encountered.)  We will 
 write `pour` to not 
 only fill in that individual cell, but also spread it through the 
 chamber.  
@@ -385,7 +387,7 @@ encounter air, like this:
 
 Our first version of `pour` can simply put water in the one 
 discovered cell of air and update the corresponding area on the 
-display: 
+display, like the lines we replaced in `scan_cave`: 
 
 ```python
 def pour(cavern: list[list[str]], row_i: int, col_i: int):
@@ -563,12 +565,37 @@ but this simpler, shorter pseudocode:
         just return without doing anything
 ```
 
+
+
 Now we just need to write one condition that checks both whether the 
 row and column are within the proper range and, if they are, whether 
 the current content of the cell at that row and column contain air. 
 Opportunities for error are fewer, and if we _do_ make a mistake, it 
 will be easier to debug.  The code is simpler to read and understand,
 and easier to write.  
+
+Don't forget the "this is a cell on the grid" check, or you might
+get this error: 
+
+```text
+IndexError: list index out of range
+```
+
+I find it simplest to write `if` statements that check for the 
+reasons we might _not_ spread water to this cell.  In pseudocode: 
+
+```text
+if row is out of range: 
+    return
+if column is out of range: 
+    return
+if the cell at (row, col) does not contain AIR: 
+    return
+# Now I know this is a cell to fill .,.
+fill this cell
+# ... and water should spread out from here
+make recursive calls for up, down, left, right
+```
 
 If you can turn that pseudocode into Python, you will have a program 
 that properly counts chambers and fills each chamber with a different 
